@@ -18,46 +18,39 @@ X = pd.DataFrame({
 
 y = data["Chance of Admit "]
 
+x1 = np.array(data["CGPA"])
+x2 = np.array(data["Research"])
+N = len(y)
+
+x1_m, x2_m = np.meshgrid(
+    np.linspace(0, 10, N),
+    np.linspace(0, 1, N),
+)
+
+X_m = np.array([
+    x1_m.ravel(),
+    x2_m.ravel()
+]).T
+
 reg = LinearRegression()
-
 reg.fit(X, y)
 
-# Drop
+print("coef (m1, m2): ", reg.coef_)
+print("intercept (b): ", reg.intercept_)
+print("R^2 (score): ", reg.score(X, y))
 
-X = X.drop(columns=["x1", "x4"])
-reg.fit(X, y)
+#y_predict = reg.coef_[0] * x1_m + reg.coef_[1] * x2_m + reg.intercept_
+y_predict = reg.predict(X_m)
+#print("y_predict: ", y_predict)
 
-# 2D
-
-m1 = reg.coef_[3]
-m2 = reg.coef_[4]
-
-x1 = X["x6"]
-x2 = X["x7"]
-
-b = reg.intercept_
-
-y_predict_1 = [m1 * x1[i] + b for i in range(len(y))]
-y_predict_2 = [m2 * x2[i] + b for i in range(len(y))]
+#plt.scatter(x1_m, x2_m, c=y_predict)
+#plt.scatter(x1, x2, c=y)
 
 # 3D
 
-N = len(y)
-
-X = np.linspace(0, 10, N)
-Y = np.linspace(0, 1, N)
-
-X, Y = np.meshgrid(X, Y)
-
-Z = np.zeros((N, N))
-
-for i in range(N):
-    for j in range(N):
-        Z[i][j] = m1 * X[i][j] + m2 * Y[i][j] + b
-
 fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(X, Y, Z)
-ax.scatter(x1, x2, y, c="magenta")
-plt.show()
 
+ax = fig.add_subplot(111, projection="3d")
+
+ax.scatter(x1, x2, y)
+ax.scatter(x1_m, x2_m, y_predict)
